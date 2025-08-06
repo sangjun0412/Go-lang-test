@@ -12,10 +12,10 @@ int main(void)
 */
     const char *json_data =
         "{"
-        "\"port\": 8080,"
+        "\"port\": 8081,"
         "\"time\": \"2025-08-06T13:00:00\","
         "\"total_count\": 12345,"
-        "\"error_count\": 23,"
+        "\"error_count\": 25,"
         "\"current_count\": 150,"
         "\"status\": \"connected\""
         "}";
