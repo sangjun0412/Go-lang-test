@@ -7,8 +7,18 @@ int main(void)
     CURL *curl;
     CURLcode res;
 
-
+/*
     const char *json_data = "{\"id\":1,\"name\":\"상준222\",\"email\":\"sangjun@example.com\"}";
+*/
+    const char *json_data =
+        "{"
+        "\"port\": 8080,"
+        "\"time\": \"2025-08-06T13:00:00\","
+        "\"total_count\": 12345,"
+        "\"error_count\": 23,"
+        "\"current_count\": 150,"
+        "\"status\": \"connected\""
+        "}";
 
     struct curl_slist *headers = NULL;
     
@@ -19,7 +29,7 @@ int main(void)
         headers = curl_slist_append(headers, "Accept: application/json");
 
         /* 요청할 URL 설정 */
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8080/users");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8080/receive");
 
         /* 강제 IPv4로 전송*/
         curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
