@@ -1,8 +1,11 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os/exec"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,12 +18,12 @@ type User struct {
 
 // 데이터 정보를 담을 구조체 정의
 type FepData struct {
-	Port             int    `json:"port"`           // 포트번호
-	ReceivedTime     string `json:"time"`           // 시간
-	TotalCount       int    `json:"total_count"`    // 총 합계
-	ErrorCount       int    `json:"error_count"`    // 오류
-	CurrentCount     int    `json: "current_count"` // 현재 수신값
-	ConnectionStatus string `json: "status"`        // 연결상태
+	Port             int    `json:"port"`          // 포트번호
+	ReceivedTime     string `json:"time"`          // 시간
+	TotalCount       int    `json:"total_count"`   // 총 합계
+	ErrorCount       int    `json:"error_count"`   // 오류
+	CurrentCount     int    `json:"current_count"` // 현재 수신값
+	ConnectionStatus string `json:"status"`        // 연결상태
 }
 
 // 사용자 정보를 메모리에 저장할 슬라이스
@@ -33,6 +36,9 @@ var fepDataMap = make(map[int]FepData)
 func main() {
 	// 기본 라우터 생성
 	router := gin.Default()
+
+	// 기본 CORS 설정으로 모든 origin 허용
+	router.Use(cors.Default())
 
 	// 사용자 목록 조회 API
 	router.GET("/users", getUsers)
@@ -62,6 +68,36 @@ func getAllFepdata(c *gin.Context) {
 		values = append(values, data)
 	}
 	c.JSON(http.StatusOK, values)
+}
+
+func handleData(c *gin.Context) {
+	//  C 프로그램 실행 (동기 실행)
+	//  ex: your_c_program이 exit code 0으로 종료되면, 정상 수행
+	cmd := exec.Command("./test") // 파일명과 필요 시 인자 추가
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "output": string(out)})
+		return
+	}
+
+	//  실행 성공 시 응답 데이터로 C 프로그램 출력 반환
+	c.JSON(http.StatusOK, gin.H{
+		"message": "C program executed successfully",
+		"output":  string(out),
+	})
+}
+
+func handleDataAsync(c *gin.Context) {
+	go func() {
+		out, err := exec.Command("./your_c_program").CombinedOutput()
+		// 필요시 로깅하거나 결과 저장 처리
+		if err != nil {
+			log.Println("C program error:", err, string(out))
+		} else {
+			log.Println("C output:", string(out))
+		}
+	}()
+	c.JSON(http.StatusAccepted, gin.H{"message": "C program started"})
 }
 
 // 사용자 등록 핸들러
